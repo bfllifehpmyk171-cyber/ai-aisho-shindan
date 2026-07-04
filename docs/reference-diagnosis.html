@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI×わたし 相性診断</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ivory: #FBF6EF;
+    --ivory-deep: #F3EAE0;
+    --ink: #3A332E;
+    --ink-soft: #6B5F56;
+    --rose: #B5677A;
+    --rose-deep: #8F4657;
+    --rose-pale: #F0DCE0;
+    --sage: #8A9A7E;
+    --sage-pale: #E6EBDF;
+    --line: #E3D7C8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Noto Sans JP', sans-serif;
+    background: radial-gradient(circle at 20% 0%, #FDF9F3, var(--ivory) 60%);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px 60px;
+  }
+  .app {
+    width: 100%;
+    max-width: 480px;
+  }
+  .progress-wrap {
+    height: 6px;
+    background: var(--ivory-deep);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .progress-bar {
+    height: 100%;
+    background: var(--rose);
+    border-radius: 999px;
+    transition: width 0.35s ease;
+  }
+  .card {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 36px 28px;
+    box-shadow: 0 8px 30px rgba(143,70,87,0.08);
+  }
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    color: var(--rose-deep);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  h1.title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 28px;
+    line-height: 1.5;
+    margin: 0 0 14px;
+  }
+  .subtitle {
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    line-height: 1.8;
+    margin-bottom: 26px;
+  }
+  .start-btn, .option-btn, .primary-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 15.5px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    border-radius: 14px;
+    border: 1.5px solid var(--line);
+    background: var(--ivory);
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    line-height: 1.5;
+  }
+  .option-btn:hover { border-color: var(--rose); background: var(--rose-pale); }
+  .option-btn.selected { border-color: var(--rose); background: var(--rose-pale); font-weight: 700; }
+  .start-btn, .primary-btn {
+    text-align: center;
+    background: var(--rose);
+    border-color: var(--rose);
+    color: white;
+    font-weight: 700;
+    font-size: 16px;
+    padding: 18px;
+  }
+  .start-btn:hover, .primary-btn:hover { background: var(--rose-deep); }
+  .q-number {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .q-text {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 21px;
+    line-height: 1.7;
+    margin-bottom: 22px;
+  }
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 18px;
+  }
+  .back-link {
+    font-size: 13px;
+    color: var(--ink-soft);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 0;
+  }
+  .back-link:hover { color: var(--rose-deep); }
+
+  .result-badge {
+    display: inline-block;
+    background: var(--sage-pale);
+    color: var(--sage);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+  .result-name {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 30px;
+    margin: 0 0 6px;
+    color: var(--rose-deep);
+  }
+  .result-catch {
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin-bottom: 22px;
+    line-height: 1.7;
+  }
+  .section-block {
+    margin-bottom: 20px;
+    padding: 18px 20px;
+    background: var(--ivory);
+    border-radius: 14px;
+  }
+  .section-label {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--rose-deep);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .section-text {
+    font-size: 15px;
+    line-height: 1.8;
+  }
+  .tool-tag {
+    display: inline-block;
+    background: white;
+    border: 1px solid var(--line);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .footer-note {
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 24px;
+    line-height: 1.8;
+  }
+  .brand-mark {
+    text-align: center;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: var(--rose-deep);
+    margin-bottom: 18px;
+  }
+  .mascot-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .mascot-bubble {
+    background: var(--rose-pale);
+    border-radius: 14px 14px 14px 2px;
+    padding: 10px 14px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--ink);
+    flex: 1;
+  }
+  .roadmap-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .roadmap-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 16px;
+  }
+  .roadmap-lv {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    background: var(--sage);
+    border-radius: 999px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .roadmap-text { font-size: 14px; line-height: 1.7; }
+  .roadmap-text b { color: var(--rose-deep); }
+  .prompt-box {
+    background: var(--ink);
+    color: #F3EAE0;
+    border-radius: 12px;
+    padding: 16px 18px;
+    font-size: 13.5px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    font-family: 'Noto Sans JP', sans-serif;
+    margin-bottom: 10px;
+  }
+  .copy-btn {
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1.5px solid var(--rose);
+    background: white;
+    color: var(--rose-deep);
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .copy-btn:hover { background: var(--rose-pale); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="brand-mark">Me-Cherish presents</div>
+  <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+function copyPrompt() {
+  const text = promptExamples[answers.priority] || '';
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    if (btn) { btn.textContent = 'コピーしました！'; setTimeout(() => { btn.textContent = 'このプロンプトをコピー'; }, 1800); }
+  });
+}
+</script>
+
+<script>
+function mascotSVG(size) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="50" cy="88" rx="26" ry="6" fill="#E3D7C8" opacity="0.5"/>
+    <path d="M28 34 Q22 14 34 18 Q38 26 36 36 Z" fill="#B5677A"/>
+    <path d="M72 34 Q78 14 66 18 Q62 26 64 36 Z" fill="#B5677A"/>
+    <circle cx="50" cy="52" r="30" fill="#FBF6EF" stroke="#B5677A" stroke-width="2.5"/>
+    <circle cx="40" cy="50" r="3.2" fill="#3A332E"/>
+    <circle cx="60" cy="50" r="3.2" fill="#3A332E"/>
+    <path d="M42 60 Q50 66 58 60" stroke="#3A332E" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <circle cx="30" cy="58" r="4" fill="#F0DCE0"/>
+    <circle cx="70" cy="58" r="4" fill="#F0DCE0"/>
+    <path d="M78 30 L80 36 L86 38 L80 40 L78 46 L76 40 L70 38 L76 36 Z" fill="#8A9A7E"/>
+  </svg>`;
+}
+function mascot(message, size) {
+  return `<div class="mascot-row">${mascotSVG(size || 56)}<div class="mascot-bubble">${message}</div></div>`;
+}
+const questions = [
+  {
+    key: "permission",
+    text: "お仕事でAIを使うこと、今どんな感じですか？",
+    options: [
+      { label: "会社でも自由に使ってOK", value: "free" },
+      { label: "会社ではNGだけど個人なら使える", value: "personal_only" },
+      { label: "正直ルールがよくわからない", value: "unsure" },
+      { label: "使わない方がいい雰囲気", value: "restricted" }
+    ]
+  },
+  {
+    key: "domain",
+    text: "普段のお仕事に一番近いのは？",
+    options: [
+      { label: "事務・管理系のお仕事", value: "office" },
+      { label: "人と接する・対人支援のお仕事", value: "people" },
+      { label: "企画・クリエイティブ系のお仕事", value: "creative" },
+      { label: "専門職(士業・医療・福祉など)", value: "specialist" },
+      { label: "経営・マネジメント", value: "management" }
+    ]
+  },
+  {
+    key: "usage",
+    text: "今のAI活用レベルは？",
+    options: [
+      { label: "聞いたことはあるけど使ったことない", value: 0 },
+      { label: "たまに調べ物で使うくらい", value: 1 },
+      { label: "仕事でそこそこ使っている", value: 2 },
+      { label: "がっつり使いこなしている", value: 3 }
+    ]
+  },
+  {
+    key: "feeling",
+    text: "AIに対する今の気持ちに近いのは？",
+    options: [
+      { label: "正直ちょっと怖い・不安", value: 0 },
+      { label: "興味はあるけど時間がない", value: 1 },
+      { label: "得意そう、もっと使いたい", value: 2 },
+      { label: "使えないと逆に不安になってきた", value: 3 }
+    ]
+  },
+  {
+    key: "priority",
+    text: "普段のお仕事で、一番時間がかかっている・大変だと感じることは？",
+    options: [
+      { label: "資料・提案書づくり", value: "doc" },
+      { label: "情報収集・リサーチ", value: "research" },
+      { label: "メール・チャット対応", value: "comm" },
+      { label: "会議準備・議事録まとめ", value: "meeting" },
+      { label: "SNS発信・画像づくり", value: "sns" },
+      { label: "エクセルなどのデータ入力・集計", value: "data" },
+      { label: "アンケート作成・集計分析", value: "survey" }
+    ]
+  },
+  {
+    key: "platform",
+    text: "普段よく使っているのはどちらですか？",
+    options: [
+      { label: "Google系(Gmail・スプレッドシートなど)", value: "google" },
+      { label: "Microsoft系(Outlook・Excel・Teamsなど)", value: "microsoft" },
+      { label: "両方使っている", value: "both" },
+      { label: "特にこだわりはない", value: "either" }
+    ]
+  },
+  {
+    key: "strength",
+    text: "自分の得意なことに近いのは？",
+    options: [
+      { label: "人と話すこと・聴くこと", value: "talk" },
+      { label: "コツコツ丁寧に作業すること", value: "steady" },
+      { label: "発想やアイデアを出すこと", value: "idea" },
+      { label: "整理整頓・段取り", value: "organize" },
+      { label: "新しいことを学ぶこと", value: "learn" }
+    ]
+  }
+];
+
+const resultTypes = {
+  A: {
+    name: "はじめの一歩さん",
+    catch: "AIとはまだ「知り合ったばかり」。だからこそ、この先の伸びしろが一番大きいタイプです。",
+    strength: "食わず嫌いをせず、今日ここに来て試してみようとしている時点で、実はもう最初の一歩を踏み出しています。素直に試せることは大きな強みです。",
+    growth: "「難しそう」「失敗したくない」という気持ちが、一歩を小さくブレーキさせがち。完璧を目指さず、まず1つだけ質問してみるところから始めましょう。",
+    tools: ["ChatGPT", "Claude", "Gemini"],
+    action: "スマホでChatGPT・Claude・Geminiのどれか1つを開き、「今日困っていること」をそのまま話しかけてみてください。どれを選んでも大丈夫、それだけで十分な第一歩です。"
+  },
+  B: {
+    name: "効率化ハンター",
+    catch: "目の前の業務を「早く・正確に」片付けたい、実務派タイプです。",
+    strength: "何にAIを使うと楽になるか、業務のポイントを見極める力があります。ムダな作業を見つけるセンスは立派な強みです。",
+    growth: "AIに任せきりにして、最終チェックを飛ばしてしまうと信頼を落とすことも。「下書きはAI、仕上げは自分」の線引きを持つと安心です。",
+    tools: ["Claude", "ChatGPT", "Gemini(Google Workspace)"],
+    action: "次に資料を作るとき、最初の下書きをAIに任せてみてください。ゼロから作るより格段に早くなります。"
+  },
+  C: {
+    name: "発想ブースターさん",
+    catch: "アイデアを広げるのが得意な、企画・クリエイティブタイプです。",
+    strength: "AIを「壁打ち相手」として使うのが一番向いています。突飛なアイデアも臆せず出せる柔軟さは大きな武器です。",
+    growth: "アイデアが広がりすぎて、まとまらなくなることも。AIに「3つに絞って」「一番現実的なのはどれ？」と聞く癖をつけると収束しやすくなります。",
+    tools: ["Claude", "ChatGPT", "Canva AI"],
+    action: "次の企画で、AIに「全く違う方向性を3つ出して」と頼んでみてください。自分では出てこない視点が手に入ります。"
+  },
+  D: {
+    name: "信頼の伴走者さん",
+    catch: "人と向き合う仕事だからこそ、AIとの向き合い方にも慎重さがあるタイプです。",
+    strength: "情報の扱いに慎重で、相手を大切にする姿勢そのものが専門職としての信頼につながっています。",
+    growth: "「使ってはいけない気がする」という思い込みで一歩が止まりがち。まずは業務外の個人利用や学習目的から、小さく試してみて大丈夫です。",
+    tools: ["Claude", "ChatGPT(個人利用から)"],
+    action: "仕事の情報は使わず、まず「自分の勉強のため」にAIへ質問してみてください。使用感をつかむだけで十分な収穫です。"
+  },
+  F: {
+    name: "経営ナビゲーターさん",
+    catch: "全体を見て判断する立場だからこそ、AIを「意思決定の相棒」にできるタイプです。",
+    strength: "複数の情報を整理して判断する力があるので、AIに情報をまとめさせてから最終判断する、という使い方が非常に相性がいいです。",
+    growth: "自分で全部把握していないと不安になり、AIに任せる範囲を狭めがち。まずは資料の下読み・要約からAIに任せてみましょう。",
+    tools: ["Claude", "Gemini(Google Workspace)", "ChatGPT"],
+    action: "次の会議前に、関連資料をAIに読み込ませて要点を3つにまとめてもらってください。判断のスピードが変わります。"
+  },
+  E: {
+    name: "使いこなし発信者さん",
+    catch: "すでにAIを味方につけている、頼れる存在です。次は「仕組み化」のフェーズです。",
+    strength: "使いこなす力はすでに十分。次のステージは、それを自分だけでなく周りにも広げていくことです。",
+    growth: "便利さが当たり前になり、周りと差がついていることに気づきにくいことも。知っていることを言葉にして共有すると、あなた自身の価値にもなります。",
+    tools: ["Claude Code", "Claude Cowork", "Zapier/Make(自動化連携)"],
+    action: "繰り返しやっている作業を1つ選んで、AIに「仕組み化」してもらいましょう。それが再現性のある資産になります。"
+  }
+};
+
+let current = 0;
+const answers = {};
+
+function renderStart() {
+  const card = document.getElementById('card');
+  document.getElementById('progressBar').style.width = '0%';
+  card.innerHTML = `
+    <div class="eyebrow">MECHERISH DIAGNOSTIC</div>
+    ${mascot("こんにちは！いっしょに、あなたに合うAIの使い方を見つけましょう🌸", 60)}
+    <h1 class="title">AI×わたし<br>相性診断</h1>
+    <div class="subtitle">8つの質問に答えるだけで、あなたに合ったAIとの付き合い方がわかります。難しく考えず、直感で選んでみてください。</div>
+    <button class="start-btn" onclick="startQuiz()">はじめる ✨</button>
+  `;
+}
+
+function startQuiz() {
+  current = 0;
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[current];
+  const card = document.getElementById('card');
+  document.getElementById('progressBar').style.width = `${(current / questions.length) * 100}%`;
+  card.innerHTML = `
+    <div class="q-number">Q${current + 1} / ${questions.length}</div>
+    <div class="q-text">${q.text}</div>
+    <div id="options"></div>
+    ${current > 0 ? '<div class="nav-row"><button class="back-link" onclick="goBack()">← 前の質問へ</button></div>' : ''}
+  `;
+  const optWrap = document.getElementById('options');
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt.label;
+    btn.onclick = () => selectAnswer(q.key, opt.value);
+    optWrap.appendChild(btn);
+  });
+}
+
+function selectAnswer(key, value) {
+  answers[key] = value;
+  if (current < questions.length - 1) {
+    current++;
+    renderQuestion();
+  } else {
+    document.getElementById('progressBar').style.width = '100%';
+    renderResult();
+  }
+}
+
+function goBack() {
+  if (current > 0) { current--; renderQuestion(); }
+}
+
+function computeType() {
+  const comfort = (answers.usage ?? 0) + (answers.feeling ?? 0);
+  if (comfort <= 1) return "A";
+  if (comfort >= 5) return "E";
+  switch (answers.domain) {
+    case "office": return "B";
+    case "creative": return "C";
+    case "people":
+    case "specialist": return "D";
+    case "management": return "F";
+    default: return "B";
+  }
+}
+
+const comboMap = {
+  doc: {
+    google: "Gemini(Google Slides連携)がそのままスライド化まで進めてくれます。",
+    microsoft: "Copilot(PowerPoint連携)が資料の下書きから仕上げまで一気通貫でできます。",
+    common: "「資料作成がイマイチ」という声のほとんどは、いきなり完成文章を求めていることが原因です。①まず見出し構成だけ作らせる→②確認・修正してから本文を肉付けする、の2段階に分けると精度が一気に上がります。文章が固まったら、Canvaに読み込ませてデザインを整え、Canvaの「Magic Write」機能で見出しのキャッチコピー案を出すのもおすすめです。"
+  },
+  research: {
+    google: "Gemini(Google検索連携)がその場で検索結果を要約してくれます。",
+    microsoft: "Copilot(Bing連携)が検索から要約まで一気に対応します。",
+    common: "Claudeは調べた内容の整理・レポート化が得意。幅広く比較したいときはChatGPTのDeep ResearchやPerplexityも便利です。"
+  },
+  comm: {
+    google: "Gmailを使っているなら、Geminiが受信メールを読んでそのまま返信の下書きを作ってくれます。",
+    microsoft: "Outlookなら、Copilotがメールの要約・返信下書きをその場で作成できます。",
+    common: "ChatGPTやClaudeは、文面のトーン(丁寧・カジュアルなど)を細かく調整したいときに向いています。"
+  },
+  meeting: {
+    google: "Google Meetの文字起こし機能とGeminiを組み合わせると、議事録が自動でまとまります。",
+    microsoft: "Teamsの文字起こし機能とCopilotを組み合わせると、要点とタスクが自動整理されます。",
+    common: "Otter.aiで録音を文字起こしし、ClaudeやNotion AIに読み込ませて要点整理・タスク化するのもおすすめです。"
+  },
+  sns: {
+    google: "",
+    microsoft: "",
+    common: "Canvaの「Magic Write」機能で画像・デザインとキャプション文の両方を一気に作れます。ChatGPTやClaudeにキャプションを何パターンか考えてもらい、Canvaでデザインに流し込むと質が安定します。動画発信ならCapCutのAI編集機能も時短になります。"
+  },
+  data: {
+    google: "Googleスプレッドシートなら、Geminiが関数作成や集計をその場で手伝ってくれます。",
+    microsoft: "Excelなら、Copilotが関数作成・ピボットテーブルの提案までしてくれます。",
+    common: "ChatGPTはデータ分析機能でグラフ化まで得意なので、報告資料への転用もスムーズです。"
+  },
+  survey: {
+    google: "Googleフォームで集めた回答は、そのままGeminiでスプレッドシートを分析させると傾向が見えてきます。",
+    microsoft: "Microsoft Formsで集めた回答は、Copilotに読み込ませると自由記述のコメントも分類・要約してくれます。",
+    common: "質問文づくり自体もClaudeやChatGPTに相談すると、回答が集まりやすい聞き方に整えてもらえます。自由記述の分析はClaudeが得意です。"
+  }
+};
+
+const promptExamples = {
+  doc: "【ステップ1：骨子だけ】\n「以下の情報をもとに、資料の見出し構成だけ3パターン考えてください。本文はまだ書かなくていいです。\n情報：〇〇」\n\n【ステップ2：肉付け】\n「①番の構成で、各見出しに300字程度の本文を追加してください。トーンは丁寧語でお願いします」",
+  research: "「〇〇について、要点を5つにまとめてください。専門用語は避けて、初めて聞く人にもわかるように説明してください」",
+  comm: "「以下のメール(または状況)に対する返信を、丁寧だけど堅すぎないトーンで3パターン作ってください。\n〇〇(状況を貼る)」",
+  meeting: "「以下は会議の文字起こしです。①決まったこと②誰が何をいつまでにやるか③次回までの宿題、の3つに分けて整理してください。\n〇〇(文字起こしを貼る)」",
+  sns: "「〇〇(商品・サービス名)のSNS投稿用キャプションを、親しみやすいトーンで3パターン作ってください。最後にハッシュタグも5つ提案してください」",
+  data: "「このデータ(表を貼る)から、傾向を3つ読み取って、専門知識がない人にもわかる言葉で説明してください」",
+  survey: "「このアンケートの自由記述回答(貼る)を、似た意見ごとにグループ分けして、それぞれの件数と代表的な意見を1つずつ教えてください」"
+};
+
+function comboNote() {
+  const c = comboMap[answers.priority];
+  if (!c) return '';
+  let platformText = '';
+  if (answers.platform === 'google' && c.google) platformText = c.google;
+  else if (answers.platform === 'microsoft' && c.microsoft) platformText = c.microsoft;
+  else if (answers.platform === 'both') platformText = [c.google, c.microsoft].filter(Boolean).join(' ');
+  const tags = [];
+  if (answers.platform === 'google' || answers.platform === 'both') tags.push('Gemini');
+  if (answers.platform === 'microsoft' || answers.platform === 'both') tags.push('Copilot');
+  tags.push('Claude', 'ChatGPT');
+  return `<span class="tool-tag">${tags.join('</span><span class="tool-tag">')}</span><div class="section-text" style="margin-top:10px;">${platformText} ${c.common}</div>`;
+}
+
+function permissionNote() {
+  switch (answers.permission) {
+    case "free": return "会社でも自由に使えるとのことなので、そのまま仕事の資料作成にも取り入れてみてください。";
+    case "personal_only": return "会社ではNGとのことなので、まずは個人のスマホ・PCで、仕事以外の場面から試すのがおすすめです。";
+    case "unsure": return "ルールが曖昧なときは、まず個人利用の範囲(調べ物・学習目的)から始めると安心です。会社のルールは一度総務や上司に確認してみてもいいかもしれません。";
+    case "restricted": return "職場での利用が難しい環境とのことなので、プライベートの時間で「自分のためのAI活用」から始めてみましょう。";
+    default: return "";
+  }
+}
+
+function renderResult() {
+  const type = computeType();
+  const r = resultTypes[type];
+  const card = document.getElementById('card');
+  card.innerHTML = `
+    <div class="result-badge">診断結果</div>
+    ${mascot("結果が出ました！あなたにぴったりの使い方、見ていきましょう✨", 56)}
+    <div class="result-name">${r.name}</div>
+    <div class="result-catch">${r.catch}</div>
+
+    <div class="section-block">
+      <div class="section-label">✓ あなたの強み</div>
+      <div class="section-text">${r.strength}</div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">◎ ここを伸ばすともっと良くなる点</div>
+      <div class="section-text">${r.growth}</div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">あなたに合うAIの活かし方</div>
+      <div class="section-text">${r.tools.map(t => `<span class="tool-tag">${t}</span>`).join('')}</div>
+      <div class="section-text" style="margin-top:10px;">${permissionNote()}</div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">その「時間がかかっている業務」、こう掛け合わせるとラクになります</div>
+      <div class="section-text">${comboNote()}</div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">📋 今日から使えるコピペ用プロンプト</div>
+      <div class="prompt-box">${promptExamples[answers.priority] || ''}</div>
+      <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">このプロンプトをコピー</button>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">🤝 AIを「秘書」にする3つのコツ</div>
+      <div class="section-text">
+        <b>①いつも同じ指示は覚えさせる</b>：「メールはこのトーンで」「資料はこの形式で」など、繰り返す指示はカスタム指示やメモリ機能に登録しておくと、毎回説明する手間がなくなります。<br><br>
+        <b>②背景情報を渡す</b>：優秀な秘書ほど「察して」動けるのは、事情を知っているから。AIも同じで、状況や目的を先に伝えるほど的確な提案が返ってきます。<br><br>
+        <b>③丸投げせず、最終判断は自分でする</b>：秘書は代わりに動いてくれますが、決めるのはあなた自身。AIの提案はたたき台として使うのが安全です。
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">📈 マスターしていくロードマップ</div>
+      <div class="roadmap-row">
+        <div class="roadmap-item">
+          <div class="roadmap-lv">Lv1</div>
+          <div class="roadmap-text"><b>まずはここから</b>：ChatGPT・Claude・Geminiのどれか1つに、今日の悩みごとを話しかけてみる。</div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-lv">Lv2</div>
+          <div class="roadmap-text"><b>慣れてきたら</b>：定型業務をテンプレ化し、同じ指示を毎回使い回す。資料作成ならCanvaと組み合わせる。</div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-lv">Lv3</div>
+          <div class="roadmap-text"><b>マスターレベル</b>：Claude(相談・下書き)、Claude Cowork(資料横断・複数アプリ連携)、Claude Code(繰り返す作業の自動化)を使い分けて、仕組みそのものを作る。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">今日からできる一歩</div>
+      <div class="section-text">${r.action}</div>
+    </div>
+
+    <button class="primary-btn" onclick="renderStart()" style="margin-top:8px;">もう一度診断する</button>
+    <div class="footer-note">この診断は、あなたに合うAIとの付き合い方を見つけるためのきっかけです。<br>もっと自分に合う使い方を知りたい方は、まゆまでお気軽に🌸</div>
+  `;
+}
+
+renderStart();
+</script>
+</body>
+</html>
