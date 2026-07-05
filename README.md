@@ -63,6 +63,14 @@ npm install        # 初回のみ
 npm run dev
 ```
 
+テスト・品質チェック:
+
+```bash
+npm test           # 診断ロジックのテスト(Vitest)
+npm run lint       # ESLint
+npm run build      # 本番ビルド確認
+```
+
 ブラウザで <http://localhost:3000> を開く。
 
 - `.env.local` に Supabase の URL とキーを記入すると回答が保存されるようになります

@@ -1,17 +1,26 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import QRCode from "qrcode";
+
+const subscribeNoop = () => () => {};
 
 // 配布用URLのQRコード生成ページ(管理者用)
 export default function QRPage() {
-  const [baseUrl, setBaseUrl] = useState("");
+  // SSR時は空文字、クライアントでは現在のオリジン(ハイドレーション不一致を避ける)
+  const baseUrl = useSyncExternalStore(
+    subscribeNoop,
+    () => window.location.origin,
+    () => ""
+  );
   const [eventTag, setEventTag] = useState("kitakyushu_seminar_20260711");
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    setBaseUrl(window.location.origin);
-  }, []);
 
   const targetUrl = eventTag.trim()
     ? `${baseUrl}/?event=${encodeURIComponent(eventTag.trim())}`
